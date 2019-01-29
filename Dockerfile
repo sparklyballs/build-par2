@@ -1,9 +1,9 @@
-FROM ubuntu:bionic
+FROM alpine:edge
 
 # install build packages
 RUN \
-	apt-get update \
-	&& apt-get install -y \
+	apk add --no-cache \
+		autoconf \
 		automake \
 		g++ \
 		git \
