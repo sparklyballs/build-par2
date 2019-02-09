@@ -1,4 +1,5 @@
-FROM alpine:edge
+ARG ALPINE_VER="3.9"
+FROM alpine:${ALPINE_VER}
 
 # install build packages
 RUN \
