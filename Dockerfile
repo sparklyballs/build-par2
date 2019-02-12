@@ -19,15 +19,16 @@ RUN \
 	set -ex \
 	&& mkdir -p \
 		/tmp/par2-src \
-	&& PAR2_COMMIT=$(curl -sX GET "https://api.github.com/repos/Parchive/par2cmdline/commits/master" \
+	&& PAR2_RAW_COMMIT=$(curl -sX GET "https://api.github.com/repos/Parchive/par2cmdline/commits/master" \
 		| jq '.sha'| xargs) \
+	&& PAR2_COMMIT="${PAR2_RAW_COMMIT:0:7}" \
 	&& curl -o \
 	/tmp/par2.tar.gz -L \
-	"https://github.com/Parchive/par2cmdline/archive/${PAR2_COMMIT:0:7}.tar.gz" \
+	"https://github.com/Parchive/par2cmdline/archive/${PAR2_COMMIT}.tar.gz" \
 	&& tar xf \
 	/tmp/par2.tar.gz -C \
 	/tmp/par2-src --strip-components=1 \
-	&& echo "PAR2_COMMIT=${PAR2_COMMIT:0:7}" > /tmp/version.txt
+	&& echo "PAR2_COMMIT=${PAR2_COMMIT}" > /tmp/version.txt
 
 FROM alpine:${ALPINE_VER} as build-stage
 
