@@ -20,7 +20,8 @@ RUN \
 	&& mkdir -p \
 		/tmp/par2-src \
 	&& PAR2_COMMIT=$(curl -sX GET "https://api.github.com/repos/Parchive/par2cmdline/commits/master" \
-		| awk '/sha/{print $4;exit}' FS='[""]'| head -c7) || : \
+		| awk '/sha/{print $4;exit}' FS='[""]'| head -c7) || EXIT_CODE=$? && true \
+	&& if [ "$EXIT_CODE" -eq 23 ] || [ "$EXIT_CODE" -eq 0 ] ; then : ; else exit 1 ; fi \
 	&& curl -o \
 	/tmp/par2.tar.gz -L \
 	"https://github.com/Parchive/par2cmdline/archive/${PAR2_COMMIT}.tar.gz" \
