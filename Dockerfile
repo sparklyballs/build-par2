@@ -8,26 +8,28 @@ RUN \
 	set -ex \
 	&& apk add --no-cache \
 		bash \
-		curl \
-		tar
+		tar \
+		wget
 
 # set shell
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+# set workdir
+WORKDIR /tmp
 
 # fetch source code
 RUN \
 	set -ex \
 	&& mkdir -p \
-		/tmp/par2-src \
-	&& PAR2_COMMIT=$(curl -sX GET "https://api.github.com/repos/Parchive/par2cmdline/commits/master" \
-		| awk '/sha/{print $4;exit}' FS='[""]'| head -c7) || EXIT_CODE=$? && true \
-	&& if [ "$EXIT_CODE" -eq 23 ] || [ "$EXIT_CODE" -eq 0 ] ; then : ; else exit 1 ; fi \
-	&& curl -o \
-	/tmp/par2.tar.gz -L \
+		par2-src \
+	&& PAR2_COMMIT=$( wget -qO- "https://api.github.com/repos/Parchive/par2cmdline/commits/master" \
+		| tac | tac | awk '/sha/{print $4;exit}' FS='[""]'| head -c7) \
+	&& wget -qO \
+	par2.tar.gz \
 	"https://github.com/Parchive/par2cmdline/archive/${PAR2_COMMIT}.tar.gz" \
 	&& tar xf \
-	/tmp/par2.tar.gz -C \
-	/tmp/par2-src --strip-components=1 \
+	par2.tar.gz -C \
+	par2-src --strip-components=1 \
 	&& echo "PAR2_COMMIT=${PAR2_COMMIT}" > /tmp/version.txt
 
 FROM alpine:${ALPINE_VER} as build-stage
