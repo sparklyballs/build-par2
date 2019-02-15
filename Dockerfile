@@ -86,7 +86,8 @@ RUN \
 	&& mkdir -p \
 		/build \
 	&& strip --strip-all par2 \
-	&& tar -czvf /build/par2-"${PAR2_COMMIT}".tar.gz par2
+	&& tar -czvf /build/par2-"${PAR2_COMMIT}".tar.gz par2 \
+	&& chown 1000:1000 /build/par2-"${PAR2_COMMIT}".tar.gz
 
 # copy files out to /mnt
 CMD ["cp", "-avr", "/build", "/mnt/"]
