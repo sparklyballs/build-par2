@@ -79,13 +79,10 @@ RUN \
 # set workdir
 WORKDIR /tmp/build/usr/bin
 
-# set shell
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-
 # strip and archive package
 # hadolint ignore=SC1091
 RUN \
-	source /tmp/version.txt \
+	. /tmp/version.txt \
 	&& set -ex \
 	&& mkdir -p \
 		/build \
