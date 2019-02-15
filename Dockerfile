@@ -80,7 +80,6 @@ RUN \
 WORKDIR /tmp/build/usr/bin
 
 # strip and archive package
-# hadolint ignore=SC1091
 RUN \
 	. /tmp/version.txt \
 	&& set -ex \
@@ -91,3 +90,5 @@ RUN \
 
 # copy files out to /mnt
 CMD ["cp", "-avr", "/build", "/mnt/"]
+
+# hadolint ignore=SC1091
