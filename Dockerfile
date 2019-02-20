@@ -20,7 +20,7 @@ RUN \
 	&& mkdir -p \
 		/tmp/par2-src \
 	&& PAR2_RAW_COMMIT=$(curl -sX GET "https://api.github.com/repos/Parchive/par2cmdline/commits/master" \
-		| jq '.sha'| xargs) \
+		| jq -r '.sha') \
 	&& PAR2_COMMIT="${PAR2_RAW_COMMIT:0:7}" \
 	&& curl -o \
 	/tmp/par2.tar.gz -L \
