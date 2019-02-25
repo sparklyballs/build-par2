@@ -8,20 +8,25 @@ RUN \
 	set -ex \
 	&& apk add --no-cache \
 		bash \
-		curl \
-		jq \
-		tar
+		curl 
+
 # set shell
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-# fetch source code
+# fetch version file
 RUN \
 	set -ex \
+	&& curl -o \
+	/tmp/version.txt -L \
+	"https://raw.githubusercontent.com/sparklyballs/versioning/master/version.txt"
+
+# fetch source code
+# hadolint ignore=SC1091
+RUN \
+	. /tmp/version.txt \
+	&& set -ex \
 	&& mkdir -p \
 		/tmp/par2-src \
-	&& PAR2_RAW_COMMIT=$(curl -sX GET "https://api.github.com/repos/Parchive/par2cmdline/commits/master" \
-		| jq -r '.sha') \
-	&& PAR2_COMMIT="${PAR2_RAW_COMMIT:0:7}" \
 	&& curl -o \
 	/tmp/par2.tar.gz -L \
 	"https://github.com/Parchive/par2cmdline/archive/${PAR2_COMMIT}.tar.gz" \
