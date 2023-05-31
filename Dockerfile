@@ -8,42 +8,36 @@ RUN \
 	set -ex \
 	&& apk add --no-cache \
 		bash \
-		curl 
+		curl \
+		git \
+		jq
+
 
 # set shell
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-# fetch version file
-RUN \
-	set -ex \
-	&& curl -o \
-	/tmp/version.txt -L \
-	"https://raw.githubusercontent.com/sparklyballs/versioning/master/version.txt"
+# set workdir
+WORKDIR /src/par2
 
-# fetch source code
-# hadolint ignore=SC1091
+# fetch source
 RUN \
-	. /tmp/version.txt \
-	&& set -ex \
-	&& mkdir -p \
-		/tmp/par2-src \
-	&& curl -o \
-	/tmp/par2.tar.gz -L \
-	"https://github.com/Parchive/par2cmdline/archive/${PAR2_COMMIT}.tar.gz" \
-	&& tar xf \
-	/tmp/par2.tar.gz -C \
-	/tmp/par2-src --strip-components=1 \
-	&& echo "PAR2_COMMIT=${PAR2_COMMIT}" > /tmp/version.txt
+	if [ -z ${RELEASE+x} ]; then \
+	RELEASE=$(curl -u "${SECRETUSER}:${SECRETPASS}" -sX GET "https://api.github.com/repos/Parchive/par2cmdline/commits/master" \
+	| jq -r ".sha"); \
+	fi \
+	&& git clone https://github.com/Parchive/par2cmdline.git /src/par2 \
+	&& RELEASE="${RELEASE:0:7}" \
+	&& git checkout "${RELEASE}"
 
 FROM alpine:${ALPINE_VER} as build-stage
 
 ############## build stage ##############
 
 # copy artifacts from fetch stage
-COPY --from=fetch-stage /tmp/par2-src /tmp/par2-src
+COPY --from=fetch-stage /src /src
 
 # set workdir
-WORKDIR /tmp/par2-src
+WORKDIR /src/par2
 
 # install build packages
 RUN \
@@ -51,8 +45,12 @@ RUN \
 	&& apk add --no-cache \
 		autoconf \
 		automake \
+		bash \
 		g++ \
 		make
+
+# set shell
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # build package
 RUN \
@@ -71,7 +69,6 @@ FROM alpine:${ALPINE_VER}
 
 # copy fetch and build artifacts
 COPY --from=build-stage /tmp/build /tmp/build
-COPY --from=fetch-stage /tmp/version.txt /tmp/version.txt
 
 # install strip packages
 RUN \
@@ -79,7 +76,12 @@ RUN \
 	&& apk add --no-cache \
 		bash \
 		binutils \
+		curl \
+		jq \
 		tar
+
+# set shell
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # set workdir
 WORKDIR /tmp/build/usr/bin
@@ -87,12 +89,16 @@ WORKDIR /tmp/build/usr/bin
 # strip and archive package
 # hadolint ignore=SC1091
 RUN \
-	. /tmp/version.txt \
+	if [ -z ${RELEASE+x} ]; then \
+	RELEASE=$(curl -u "${SECRETUSER}:${SECRETPASS}" -sX GET "https://api.github.com/repos/Parchive/par2cmdline/commits/master" \
+	| jq -r ".sha"); \
+	fi \
+	&& RELEASE="${RELEASE:0:7}" \
 	&& set -ex \
 	&& mkdir -p \
 		/build \
 	&& strip --strip-all par2 \
-	&& tar -czvf /build/par2-"${PAR2_COMMIT}".tar.gz par2 \
+	&& tar -czvf /build/par2-"${RELEASE}".tar.gz par2 \
 	&& chown -R 1000:1000 /build
 
 # copy files out to /mnt
