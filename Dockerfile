@@ -1,6 +1,9 @@
 ARG ALPINE_VER="3.18"
 FROM alpine:${ALPINE_VER} as fetch-stage
 
+# build arguments
+ARG RELEASE
+
 ############## fetch stage ##############
 
 # install fetch packages
@@ -66,6 +69,9 @@ RUN \
 FROM alpine:${ALPINE_VER}
 
 ############## package stage ##############
+
+# build arguments
+ARG RELEASE
 
 # copy fetch and build artifacts
 COPY --from=build-stage /tmp/build /tmp/build
