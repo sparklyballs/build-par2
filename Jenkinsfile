@@ -13,7 +13,7 @@ environment {
 	CREDS_GITHUB=credentials('bd8b00ff-decf-4a75-9e56-1ea2c7d0d708')
 	CONTAINER_NAME = 'par2'
 	CONTAINER_REPOSITORY = 'sparklyballs/par2'
-	GITHUB_RELEASE_URL_SUFFIX = 'Parchive/par2cmdline/commits/master'
+	GITHUB_RELEASE_URL_SUFFIX = 'animetosho/par2cmdline-turbo/releases/latest'
 	GITHUB_REPOSITORY = 'sparklyballs/build-par2'
 	HADOLINT_OPTIONS = '--ignore DL3008 --ignore DL3013 --ignore DL3018 --ignore DL3028 --format json'
 	}
@@ -23,8 +23,7 @@ stages {
 stage('Query Release Version') {
 steps {
 script{
-	env.RELEASE_VER = sh(script: 'curl -sX GET "https://api.github.com/repos/${GITHUB_RELEASE_URL_SUFFIX}" | jq -r ".sha"', returnStdout: true).trim() 
-	env.RELEASE_VER = "$RELEASE_VER"[0..7]
+	env.RELEASE_VER = sh(script: 'curl -sX GET "https://api.github.com/repos/${GITHUB_RELEASE_URL_SUFFIX}" | jq -r ".tag_name"', returnStdout: true).trim() 
 	}
 	}
 	}

@@ -1,4 +1,4 @@
-ARG ALPINE_VER="3.18"
+ARG ALPINE_VER="3.19"
 FROM alpine:${ALPINE_VER} as fetch-stage
 
 # build arguments
@@ -25,10 +25,10 @@ WORKDIR /src/par2
 # fetch source
 RUN \
 	if [ -z ${RELEASE+x} ]; then \
-	RELEASE=$(curl -u "${SECRETUSER}:${SECRETPASS}" -sX GET "https://api.github.com/repos/Parchive/par2cmdline/commits/master" \
-	| jq -r ".sha"); \
+	RELEASE=$(curl -u "${SECRETUSER}:${SECRETPASS}" -sX GET "https://api.github.com/repos/animetosho/par2cmdline-turbo/releases/latest" \
+	| jq -r ".tag_name"); \
 	fi \
-	&& git clone https://github.com/Parchive/par2cmdline.git /src/par2 \
+	&& git clone https://github.com/animetosho/par2cmdline-turbo.git /src/par2 \
 	&& RELEASE="${RELEASE:0:7}" \
 	&& git checkout "${RELEASE}"
 
@@ -96,8 +96,8 @@ WORKDIR /tmp/build/usr/bin
 # hadolint ignore=SC1091
 RUN \
 	if [ -z ${RELEASE+x} ]; then \
-	RELEASE=$(curl -u "${SECRETUSER}:${SECRETPASS}" -sX GET "https://api.github.com/repos/Parchive/par2cmdline/commits/master" \
-	| jq -r ".sha"); \
+	RELEASE=$(curl -u "${SECRETUSER}:${SECRETPASS}" -sX GET "https://api.github.com/repos/animetosho/par2cmdline-turbo/releases/latest" \
+	| jq -r ".tag_name"); \
 	fi \
 	&& RELEASE="${RELEASE:0:7}" \
 	&& set -ex \
